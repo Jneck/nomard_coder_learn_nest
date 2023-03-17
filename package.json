@@ -1,7 +1,7 @@
 {
   "name": "learn_nest",
   "version": "0.0.1",
-  "description": "",
+  "description": "<p align=\"center\">   <a href=\"http://nestjs.com/\" target=\"blank\"><img src=\"https://nestjs.com/img/logo-small.svg\" width=\"200\" alt=\"Nest Logo\" /></a> </p>",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -26,8 +26,11 @@
     "@nestjs/platform-express": "^9.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.2.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "typeorm": "^0.3.12"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
@@ -68,5 +71,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": []
 }
