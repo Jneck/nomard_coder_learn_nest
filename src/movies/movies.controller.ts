@@ -1,5 +1,9 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseFilters } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseFilters, UseGuards, UsePipes } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
+import { JoiValidationPipe } from 'src/joi-validation/joi-validation.pipe';
+import { Roles } from 'src/roles/roles.decorator';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { ValidationPipe } from 'src/validation/validation.pipe';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entities/movie.entity';
@@ -11,7 +15,7 @@ export class MoviesController {
     constructor(private readonly moviesService: MoviesService) { }
 
     @Get()
-    getAll(): Promise<Movie[]> {
+    async getAll(): Promise<Movie[]> {
         return this.moviesService.getAll();
     }
 
@@ -21,25 +25,25 @@ export class MoviesController {
     // }
 
     @Get('/:id')
-    getOne(@Param('id') movieId: number): Promise<Movie[]> {
+    async getOne(@Param('id') movieId: number): Promise<Movie[]> {
         console.log(typeof movieId);
         return this.moviesService.getOne(movieId);
     }
 
     @Post()
-    create(@Body() movieData: CreateMovieDto) {
+    async create(@Body() movieData: CreateMovieDto) {
         return this.moviesService.create(movieData);
     }
 
     @Delete("/:id")
-    remove(@Param('id') movieId: number) {
+    async remove(@Param('id') movieId: number) {
         return this.moviesService.deleteOne(movieId);
     }
 
     // // @Put 모든 것을 업데이트 하여서 patch를 주로 이용
 
     @Patch('/:id')
-    patch(@Param('id') movieId: number, @Body() updateData: UpdateMovieDto) {
+    async patch(@Param('id') movieId: number, @Body() updateData: UpdateMovieDto) {
         return this.moviesService.update(movieId, updateData);
     }
 
@@ -92,6 +96,35 @@ export class MoviesController {
         return this.moviesService.getOne(movieId);
     }
 
-    // 3. 
+    // 3. joi validation pipe 적용하기
+    // @Post('/pipe/validation')
+    // @UsePipes(new JoiValidationPipe(createMovieSchema))
+    // async validationPipeJoi(@Body() createMovieDto: CreateMovieDto) {
+    //     this.moviesService.create(createMovieDto);
+    // }
+
+    // 4. 커스텀 validation pipe 적용하기
+    @Post('/pipe/validation')
+    async validationPipeExample(@Body(new ValidationPipe()) createMovieDto: CreateMovieDto) {
+        this.moviesService.create(createMovieDto);
+    }
+
+
+    /*
+        learn guard
+    */
+    // 1. role guard
+    @Get('/guard/get')
+    @UseGuards(RolesGuard)
+    async rolesGuardGetAll(): Promise<Movie[]> {
+        return this.moviesService.getAll();
+    }
+
+    // 2. make role
+    @Post('/guard/post')
+    @Roles('admin')
+    async rolesGuardCreate(@Body() CreateMovieDto: CreateMovieDto) {
+        this.moviesService.create(CreateMovieDto);
+    }
 
 }
