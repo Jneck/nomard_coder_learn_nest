@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Req, Res, UseFilters } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseFilters } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -43,7 +43,9 @@ export class MoviesController {
         return this.moviesService.update(movieId, updateData);
     }
 
-    // learn exception filter
+    /*
+        learn exception filter
+    */
     // 1. standard execption
     @Get('/exception/standard')
     async standardException() {
@@ -73,6 +75,23 @@ export class MoviesController {
         throw new ForbiddenException;
     }
 
+    /*
+        learn pipe
+    */
+    // 1. PareseIntPipe
+    @Get('/pipe/:id')
+    async parseIntPipeExample(@Param('id', ParseIntPipe) movieId: number) {
+        console.log(typeof movieId);
+        return this.moviesService.getOne(movieId);
+    }
 
+    // 2. pipe instance -> custom
+    @Get('/pipe/instance/:id')
+    async parseIntPipeInstance(@Param('id', new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE })) movieId: number) {
+        console.log(typeof movieId);
+        return this.moviesService.getOne(movieId);
+    }
+
+    // 3. 
 
 }
