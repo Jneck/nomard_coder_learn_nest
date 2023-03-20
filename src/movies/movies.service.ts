@@ -26,7 +26,12 @@ export class MoviesService {
     }
 
     async deleteOne(id: number) {
-        this.getOne(id);    // 여기서 없을 경우 자동으로 예외처리 해줌
+        // id를따오는 함수를
+        const movie = await this.moviesRepository.findBy({
+            id: id
+        });
+        // movie를 가지고 하는 함수
+
         const deleteResult = this.moviesRepository.delete(id);
     }
 

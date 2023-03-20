@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, Patch, Post, Query, Req, Res, UseFilters } from '@nestjs/common';
+import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entities/movie.entity';
@@ -19,11 +20,11 @@ export class MoviesController {
     //     return `We are searching for a movie made after: ${searchinYear}`;
     // }
 
-    // @Get('/:id')
-    // getOne(@Param('id') movieId: number): Movie {
-    //     console.log(typeof movieId);
-    //     return this.moviesService.getOne(movieId);
-    // }
+    @Get('/:id')
+    getOne(@Param('id') movieId: number): Promise<Movie[]> {
+        console.log(typeof movieId);
+        return this.moviesService.getOne(movieId);
+    }
 
     @Post()
     create(@Body() movieData: CreateMovieDto) {
@@ -41,5 +42,37 @@ export class MoviesController {
     patch(@Param('id') movieId: number, @Body() updateData: UpdateMovieDto) {
         return this.moviesService.update(movieId, updateData);
     }
+
+    // learn exception filter
+    // 1. standard execption
+    @Get('/exception/standard')
+    async standardException() {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+
+    // 2. try catch
+    @Get('exception/cause/:id')
+    async standardCauseException(@Param('id') movieId: number) {
+        try {
+            this.moviesService.deleteOne(movieId);
+        }
+        catch (err) {
+            throw new HttpException({
+                status: HttpStatus.FORBIDDEN,
+                error: "This is a custom message",
+            }
+                , HttpStatus.FORBIDDEN
+                , { cause: err });
+        }
+    }
+
+    // 3. new exception filter
+    @Post('/exception/filter')
+    @UseFilters(HttpExceptionFilter)
+    async createExceptionFilter(@Body() createDto: CreateMovieDto) {
+        throw new ForbiddenException;
+    }
+
+
 
 }
