@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseFilters, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
+import { RealIP } from 'nestjs-real-ip';
+import { CacheInterceptor } from 'src/cache/cache.interceptor';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { JoiValidationPipe } from 'src/joi-validation/joi-validation.pipe';
 import { LoggingInterceptor } from 'src/logging/logging.interceptor';
@@ -134,18 +136,32 @@ export class MoviesController {
         learn interceptor
     */
     // 1. transform interceptor data -> data
-    @Get('/interceptor/get')
+    @Get('/interceptor/transform')
     @UseInterceptors(TransformInterceptor)
-    async interceptorGetAll(): Promise<Movie[]> {
+    async interceptorTransform(): Promise<Movie[]> {
         return this.moviesService.getAll();
     }
 
     // 2. timeout interceptor
     @Get('/interceptor/timeout')
     @UseInterceptors(TimeoutInterceptor)
-    interceptorTimeout() {
+    async interceptorTimeout() {
         for (let i = 0; i < 1000000000; i++) {
             const a = i.toString() + 'testtest';
         }
+    }
+
+    // 3. cache interceptor
+    @Get('/interceptor/cache')
+    @UseInterceptors(CacheInterceptor)
+    async interceptorCache(): Promise<Movie[]> {
+        return this.moviesService.getAll();
+    }
+
+
+    // realip 확인하기
+    @Get('/realIP/get')
+    getRealIP(@RealIP() ip: string): string {
+        return ip;
     }
 }
