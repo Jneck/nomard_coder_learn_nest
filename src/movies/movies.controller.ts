@@ -1,15 +1,20 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseFilters, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseFilters, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/http-exception/http-exception.filter';
 import { JoiValidationPipe } from 'src/joi-validation/joi-validation.pipe';
+import { LoggingInterceptor } from 'src/logging/logging.interceptor';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
+import { TimeoutInterceptor } from 'src/timeout/timeout.interceptor';
+import { TransformInterceptor } from 'src/transform/transform.interceptor';
 import { ValidationPipe } from 'src/validation/validation.pipe';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
 
+
 @Controller('movies')
+@UseInterceptors(LoggingInterceptor)
 export class MoviesController {
 
     constructor(private readonly moviesService: MoviesService) { }
@@ -41,7 +46,6 @@ export class MoviesController {
     }
 
     // // @Put 모든 것을 업데이트 하여서 patch를 주로 이용
-
     @Patch('/:id')
     async patch(@Param('id') movieId: number, @Body() updateData: UpdateMovieDto) {
         return this.moviesService.update(movieId, updateData);
@@ -109,7 +113,6 @@ export class MoviesController {
         this.moviesService.create(createMovieDto);
     }
 
-
     /*
         learn guard
     */
@@ -127,4 +130,22 @@ export class MoviesController {
         this.moviesService.create(CreateMovieDto);
     }
 
+    /*
+        learn interceptor
+    */
+    // 1. transform interceptor data -> data
+    @Get('/interceptor/get')
+    @UseInterceptors(TransformInterceptor)
+    async interceptorGetAll(): Promise<Movie[]> {
+        return this.moviesService.getAll();
+    }
+
+    // 2. timeout interceptor
+    @Get('/interceptor/timeout')
+    @UseInterceptors(TimeoutInterceptor)
+    interceptorTimeout() {
+        for (let i = 0; i < 1000000000; i++) {
+            const a = i.toString() + 'testtest';
+        }
+    }
 }
